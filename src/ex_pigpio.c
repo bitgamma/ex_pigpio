@@ -21,6 +21,7 @@ typedef struct {
   ERL_NIF_TERM atom_not_pwm_gpio;
   ERL_NIF_TERM atom_bad_pulsewidth;
   ERL_NIF_TERM atom_not_servo_gpio;
+  ERL_NIF_TERM atom_bad_dutyrange;
 
   ERL_NIF_TERM atom_input;
   ERL_NIF_TERM atom_output;
@@ -302,9 +303,9 @@ static ERL_NIF_TERM set_servo(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   	return enif_make_badarg(env);
   }
 
-  int pulsewidth;
+  unsigned pulsewidth;
 
-  if (!enif_get_int(env, argv[1], &pulsewidth)) {
+  if (!enif_get_uint(env, argv[1], &pulsewidth)) {
     return enif_make_badarg(env);
   }
 
@@ -449,6 +450,56 @@ static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
   return priv->atom_ok;
 }
 
+static ERL_NIF_TERM set_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+  	return enif_make_badarg(env);
+  }
+
+  unsigned range;
+
+  if (!enif_get_uint(env, argv[1], &range)) {
+    return enif_make_badarg(env);
+  }
+
+  int err = gpioSetPWMrange(gpio, range);
+
+  switch(err) {
+    case 0:
+      return priv->atom_ok;
+    case PI_BAD_USER_GPIO:
+      return priv->atom_bad_user_gpio;
+    case PI_BAD_DUTYRANGE:
+      return priv->atom_bad_dutyrange;
+    default:
+      return priv->atom_error;
+  }
+}
+
+static ERL_NIF_TERM get_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+  	return enif_make_badarg(env);
+  }
+
+  int value = gpioGetPWMrange(gpio);
+
+  switch(value) {
+    case PI_BAD_USER_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
+    default:
+      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
+  }
+}
+
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
   { "get_mode", 1, get_mode },
@@ -461,7 +512,9 @@ static ErlNifFunc funcs[] = {
   { "get_servo_pulsewidth", 1, get_servo_pulsewidth },
   { "udelay", 1, udelay },
   { "add_alert", 2, add_alert },
-  { "remove_alert", 2, remove_alert }
+  { "remove_alert", 2, remove_alert },
+  { "set_pwm_range", 2, set_pwm_range },
+  { "get_pwm_range", 1, get_pwm_range }
 };
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
@@ -482,6 +535,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_not_pwm_gpio = enif_make_atom(env, "not_pwm_gpio");
   data->atom_bad_pulsewidth = enif_make_atom(env, "bad_pulsewidth");
   data->atom_not_servo_gpio = enif_make_atom(env, "not_servo_gpio");
+  data->atom_bad_dutyrange = enif_make_atom(env, "bad_dutyrange");
 
   data->atom_input = enif_make_atom(env, "input");
   data->atom_output = enif_make_atom(env, "output");

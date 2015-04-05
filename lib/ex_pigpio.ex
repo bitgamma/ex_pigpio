@@ -53,4 +53,12 @@ defmodule ExPigpio do
   def remove_alert(_gpio, _pid) do
     exit(:nif_not_loaded)
   end
+
+  def set_pwm_range(_gpio, _range) do
+    exit(:nif_not_loaded)
+  end
+
+  def get_pwm_range(_gpio) do
+    exit(:nif_not_loaded)
+  end
 end
