@@ -413,7 +413,7 @@ static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
   ex_pigpio_cb *prev_callback = NULL;
 
   while(callback != NULL) {
-    int removed = 0;
+    ex_pigpio_cb *to_remove = NULL;
 
     if (callback->gpio == gpio) {
       ERL_NIF_TERM last_pid = enif_make_pid(env, &callback->receiver_pid);
@@ -426,7 +426,7 @@ static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
         }
 
         found = 1;
-        removed = 1;
+        to_remove = callback;
       } else {
         is_last_for_gpio = 0;
       }
@@ -434,9 +434,9 @@ static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
 
     callback = callback->next;
 
-    if (removed) {
-      enif_free_env(callback->env);
-      enif_free(callback);
+    if (to_remove != NULL) {
+      enif_free_env(to_remove->env);
+      enif_free(to_remove);
     } else {
       prev_callback = callback;
     }
