@@ -35,6 +35,8 @@ typedef struct {
   ERL_NIF_TERM atom_down;
   ERL_NIF_TERM atom_off;
 
+  ERL_NIF_TERM atom_gpio_alert;
+
   ex_pigpio_cb *first_cb;
 } ex_pigpio_priv;
 
@@ -44,12 +46,11 @@ void _empty_signal_handler(int signum) {
 
 void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
   ex_pigpio_priv *priv = (ex_pigpio_priv *) userdata;
-
   ex_pigpio_cb *cb = priv->first_cb;
 
   while(cb != NULL) {
     if (cb->gpio == gpio) {
-      ERL_NIF_TERM tuple = enif_make_tuple3(cb->env, enif_make_int(cb->env, gpio), enif_make_int(cb->env, level), enif_make_uint(cb->env, tick));
+      ERL_NIF_TERM tuple = enif_make_tuple4(cb->env, priv->atom_gpio_alert, enif_make_int(cb->env, gpio), enif_make_int(cb->env, level), enif_make_uint(cb->env, tick));
       enif_send(cb->env, &cb->receiver_pid, cb->env, tuple);
       enif_clear_env(cb->env);
     }
@@ -434,6 +435,8 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_up = enif_make_atom(env, "up");
   data->atom_down = enif_make_atom(env, "down");
   data->atom_off = enif_make_atom(env, "off");
+
+  data->atom_gpio_alert = enif_make_atom(env, "gpio_alert");
 
   data->first_cb = NULL;
 
