@@ -6,15 +6,19 @@ defmodule ExPigpio do
     :ok = :erlang.load_nif(path, 0)
   end
 
-  def set_mode(pin, mode) do
+  def set_mode(_pin, _mode) do
     exit(:nif_not_loaded)
   end
 
-  def read(pin) do
+  def get_mode(_pin) do
     exit(:nif_not_loaded)
   end
 
-  def write(pin, value) do
+  def read(_pin) do
+    exit(:nif_not_loaded)
+  end
+
+  def write(_pin, _value) do
     exit(:nif_not_loaded)
   end
 end

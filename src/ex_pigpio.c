@@ -4,10 +4,20 @@
 typedef struct {
   ERL_NIF_TERM atom_ok;
   ERL_NIF_TERM atom_error;
+
   ERL_NIF_TERM atom_bad_gpio;
   ERL_NIF_TERM atom_bad_level;
+  ERL_NIF_TERM atom_bad_mode;
+
   ERL_NIF_TERM atom_input;
   ERL_NIF_TERM atom_output;
+  ERL_NIF_TERM atom_alt0;
+  ERL_NIF_TERM atom_alt1;
+  ERL_NIF_TERM atom_alt2;
+  ERL_NIF_TERM atom_alt3;
+  ERL_NIF_TERM atom_alt4;
+  ERL_NIF_TERM atom_alt5;
+
 } ex_pigpio_priv;
 
 static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
@@ -26,8 +36,20 @@ static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
     mode = PI_INPUT;
   } else if (!enif_compare(argv[1], priv->atom_output)) {
     mode = PI_OUTPUT;
+  } else if (!enif_compare(argv[1], priv->atom_alt0)) {
+    mode = PI_ALT0;
+  } else if (!enif_compare(argv[1], priv->atom_alt1)) {
+    mode = PI_ALT1;
+  } else if (!enif_compare(argv[1], priv->atom_alt2)) {
+    mode = PI_ALT2;
+  } else if (!enif_compare(argv[1], priv->atom_alt3)) {
+    mode = PI_ALT3;
+  } else if (!enif_compare(argv[1], priv->atom_alt4)) {
+    mode = PI_ALT4;
+  } else if (!enif_compare(argv[1], priv->atom_alt5)) {
+    mode = PI_ALT5;
   } else {
-    return enif_make_badarg(env);
+    return priv->atom_bad_mode;
   }
 
   int err = gpioSetMode(pin, mode);
@@ -39,6 +61,42 @@ static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
       return priv->atom_bad_gpio;
     default:
       return priv->atom_error;
+  }
+}
+
+static ERL_NIF_TERM get_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  int pin;
+
+  if (!enif_get_int(env, argv[0], &pin)) {
+    return enif_make_badarg(env);
+  }
+
+  int mode = gpioGetMode(pin);
+
+  switch(mode) {
+    case PI_INPUT:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_input);
+    case PI_OUTPUT:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_output);
+    case PI_ALT0:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt0);
+    case PI_ALT1:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt1);
+    case PI_ALT2:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt2);
+    case PI_ALT3:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt3);
+    case PI_ALT4:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt4);
+    case PI_ALT5:
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt5);            
+    case PI_BAD_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_gpio);
+    default:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_error);
   }
 }
 
@@ -93,6 +151,7 @@ static ERL_NIF_TERM write(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
+  { "get_mode", 1, get_mode },
   { "read", 1, read },
   { "write", 2, write },
 };
@@ -108,9 +167,16 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_error = enif_make_atom(env, "error");
   data->atom_bad_gpio = enif_make_atom(env, "bad_gpio");
   data->atom_bad_level = enif_make_atom(env, "bad_level");
-  data->atom_error = enif_make_atom(env, "error");
+  data->atom_bad_mode = enif_make_atom(env, "bad_mode");
+
   data->atom_input = enif_make_atom(env, "input");
   data->atom_output = enif_make_atom(env, "output");
+  data->atom_alt0 = enif_make_atom(env, "alt0");
+  data->atom_alt1 = enif_make_atom(env, "alt1");
+  data->atom_alt2 = enif_make_atom(env, "alt2");
+  data->atom_alt3 = enif_make_atom(env, "alt3");
+  data->atom_alt4 = enif_make_atom(env, "alt4");
+  data->atom_alt5 = enif_make_atom(env, "alt5");
 
   *priv = (void*) data;
 
