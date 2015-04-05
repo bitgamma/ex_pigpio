@@ -55,9 +55,9 @@ static ERL_NIF_TERM read(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   int value = gpioRead(pin);
 
   if (value != PI_BAD_GPIO) {
-    return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value))
+    return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
   } else {
-    return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_gpio)
+    return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_gpio);
   }
 }
 
