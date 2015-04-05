@@ -22,9 +22,9 @@ static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
 
   int mode;
 
-  if (enif_compare(argv[1], priv->atom_input)) {
+  if (!enif_compare(argv[1], priv->atom_input)) {
     mode = PI_INPUT;
-  } else if (enif_compare(argv[1], priv->atom_output)) {
+  } else if (!enif_compare(argv[1], priv->atom_output)) {
     mode = PI_OUTPUT;
   } else {
     return enif_make_badarg(env);
