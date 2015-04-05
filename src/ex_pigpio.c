@@ -126,7 +126,6 @@ static ERL_NIF_TERM set_pull_resistor(ErlNifEnv* env, int argc, const ERL_NIF_TE
     return priv->atom_bad_pud;
   }
 
-
   int err = gpioSetPullUpDown(pin, pud);
 
   switch(err) {
