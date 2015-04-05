@@ -6,39 +6,39 @@ defmodule ExPigpio do
     :ok = :erlang.load_nif(path, 0)
   end
 
-  def set_mode(_pin, _mode) do
+  def set_mode(_gpio, _mode) do
     exit(:nif_not_loaded)
   end
 
-  def get_mode(_pin) do
+  def get_mode(_gpio) do
     exit(:nif_not_loaded)
   end
 
-  def set_pull_resistor(_pin, _pud) do
+  def set_pull_resistor(_gpio, _pud) do
     exit(:nif_not_loaded)
   end
 
-  def read(_pin) do
+  def read(_gpio) do
     exit(:nif_not_loaded)
   end
 
-  def write(_pin, _value) do
+  def write(_gpio, _value) do
     exit(:nif_not_loaded)
   end
 
-  def set_pwm(_pin, _dutycycle) do
+  def set_pwm(_gpio, _dutycycle) do
     exit(:nif_not_loaded)
   end
 
-  def get_pwm_dutycycle(_pin) do
+  def get_pwm_dutycycle(_gpio) do
     exit(:nif_not_loaded)
   end
 
-  def set_servo(_pin, _pulsewidth) do
+  def set_servo(_gpio, _pulsewidth) do
     exit(:nif_not_loaded)
   end
 
-  def get_servo_pulsewidth(_pin) do
+  def get_servo_pulsewidth(_gpio) do
     exit(:nif_not_loaded)
   end
 

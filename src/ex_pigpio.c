@@ -49,13 +49,13 @@ static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
     return enif_make_badarg(env);
   }
 
-  int mode;
+  unsigned mode;
 
   if (!enif_compare(argv[1], priv->atom_input)) {
     mode = PI_INPUT;
@@ -77,7 +77,7 @@ static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
     return priv->atom_bad_mode;
   }
 
-  int err = gpioSetMode(pin, mode);
+  int err = gpioSetMode(gpio, mode);
 
   switch(err) {
     case 0:
@@ -93,13 +93,13 @@ static ERL_NIF_TERM get_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
     return enif_make_badarg(env);
   }
 
-  int mode = gpioGetMode(pin);
+  int mode = gpioGetMode(gpio);
 
   switch(mode) {
     case PI_INPUT:
@@ -129,13 +129,13 @@ static ERL_NIF_TERM set_pull_resistor(ErlNifEnv* env, int argc, const ERL_NIF_TE
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int pud;
+  unsigned pud;
 
   if (!enif_compare(argv[1], priv->atom_up)) {
     pud = PI_PUD_UP;
@@ -147,7 +147,7 @@ static ERL_NIF_TERM set_pull_resistor(ErlNifEnv* env, int argc, const ERL_NIF_TE
     return priv->atom_bad_pud;
   }
 
-  int err = gpioSetPullUpDown(pin, pud);
+  int err = gpioSetPullUpDown(gpio, pud);
 
   switch(err) {
     case 0:
@@ -165,13 +165,13 @@ static ERL_NIF_TERM read(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int value = gpioRead(pin);
+  int value = gpioRead(gpio);
 
   if (value != PI_BAD_GPIO) {
     return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
@@ -184,19 +184,19 @@ static ERL_NIF_TERM write(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int value;
+  unsigned value;
 
-  if (!enif_get_int(env, argv[1], &value)) {
+  if (!enif_get_uint(env, argv[1], &value)) {
     return enif_make_badarg(env);
   }
 
-  int err = gpioWrite(pin, value);
+  int err = gpioWrite(gpio, value);
 
   switch(err) {
     case 0:
@@ -214,19 +214,19 @@ static ERL_NIF_TERM set_pwm(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int dutycycle;
+  unsigned dutycycle;
 
-  if (!enif_get_int(env, argv[1], &dutycycle)) {
+  if (!enif_get_uint(env, argv[1], &dutycycle)) {
     return enif_make_badarg(env);
   }
 
-  int err = gpioPWM(pin, dutycycle);
+  int err = gpioPWM(gpio, dutycycle);
 
   switch(err) {
     case 0:
@@ -244,13 +244,13 @@ static ERL_NIF_TERM get_pwm_dutycycle(ErlNifEnv* env, int argc, const ERL_NIF_TE
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int value = gpioGetPWMdutycycle(pin);
+  int value = gpioGetPWMdutycycle(gpio);
 
   switch(value) {
     case PI_BAD_USER_GPIO:
@@ -266,9 +266,9 @@ static ERL_NIF_TERM set_servo(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
@@ -278,7 +278,7 @@ static ERL_NIF_TERM set_servo(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
     return enif_make_badarg(env);
   }
 
-  int err = gpioServo(pin, pulsewidth);
+  int err = gpioServo(gpio, pulsewidth);
 
   switch(err) {
     case 0:
@@ -296,13 +296,13 @@ static ERL_NIF_TERM get_servo_pulsewidth(ErlNifEnv* env, int argc, const ERL_NIF
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
 
-  int pin;
+  unsigned gpio;
 
-  if (!enif_get_int(env, argv[0], &pin)) {
+  if (!enif_get_uint(env, argv[0], &gpio)) {
   	return enif_make_badarg(env);
   }
 
-  int value = gpioGetServoPulsewidth(pin);
+  int value = gpioGetServoPulsewidth(gpio);
 
   switch(value) {
     case PI_BAD_USER_GPIO:
@@ -315,15 +315,15 @@ static ERL_NIF_TERM get_servo_pulsewidth(ErlNifEnv* env, int argc, const ERL_NIF
 }
 
 static ERL_NIF_TERM udelay(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-  int usec;
+  uint32_t usec;
 
-  if (!enif_get_int(env, argv[0], &usec)) {
+  if (!enif_get_uint(env, argv[0], &usec)) {
   	return enif_make_badarg(env);
   }
 
-  int value = gpioDelay(usec);
+  uint32_t value = gpioDelay(usec);
 
-  return enif_make_int(env, value);
+  return enif_make_uint(env, value);
 }
 
 static ErlNifFunc funcs[] = {
