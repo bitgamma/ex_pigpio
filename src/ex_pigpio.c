@@ -8,6 +8,7 @@ typedef struct {
   ERL_NIF_TERM atom_bad_gpio;
   ERL_NIF_TERM atom_bad_level;
   ERL_NIF_TERM atom_bad_mode;
+  ERL_NIF_TERM atom_bad_pud;
 
   ERL_NIF_TERM atom_input;
   ERL_NIF_TERM atom_output;
@@ -18,6 +19,9 @@ typedef struct {
   ERL_NIF_TERM atom_alt4;
   ERL_NIF_TERM atom_alt5;
 
+  ERL_NIF_TERM atom_up;
+  ERL_NIF_TERM atom_down;
+  ERL_NIF_TERM atom_off;
 } ex_pigpio_priv;
 
 static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
@@ -92,11 +96,48 @@ static ERL_NIF_TERM get_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
     case PI_ALT4:
       return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt4);
     case PI_ALT5:
-      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt5);            
+      return enif_make_tuple2(env, priv->atom_ok, priv->atom_alt5);
     case PI_BAD_GPIO:
       return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_gpio);
     default:
       return enif_make_tuple2(env, priv->atom_error, priv->atom_error);
+  }
+}
+
+static ERL_NIF_TERM set_pull_resistor(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  int pin;
+
+  if (!enif_get_int(env, argv[0], &pin)) {
+  	return enif_make_badarg(env);
+  }
+
+  int pud;
+
+  if (!enif_compare(argv[1], priv->atom_up)) {
+    pud = PI_PUD_UP;
+  } else if (!enif_compare(argv[1], priv->atom_down)) {
+    pud = PI_PUD_DOWN;
+  } else if (!enif_compare(argv[1], priv->atom_off)) {
+    pud = PI_PUD_OFF;
+  } else {
+    return priv->atom_bad_pud;
+  }
+
+
+  int err = gpioSetPullUpDown(pin, pud);
+
+  switch(err) {
+    case 0:
+      return priv->atom_ok;
+    case PI_BAD_GPIO:
+      return priv->atom_bad_gpio;
+    case PI_BAD_PUD:
+      return priv->atom_bad_pud;
+    default:
+      return priv->atom_error;
   }
 }
 
@@ -152,6 +193,7 @@ static ERL_NIF_TERM write(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
   { "get_mode", 1, get_mode },
+  { "set_pull_resistor", 2, set_pull_resistor },
   { "read", 1, read },
   { "write", 2, write },
 };
@@ -168,6 +210,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_bad_gpio = enif_make_atom(env, "bad_gpio");
   data->atom_bad_level = enif_make_atom(env, "bad_level");
   data->atom_bad_mode = enif_make_atom(env, "bad_mode");
+  data->atom_bad_pud = enif_make_atom(env, "bad_pud");
 
   data->atom_input = enif_make_atom(env, "input");
   data->atom_output = enif_make_atom(env, "output");
@@ -177,6 +220,10 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_alt3 = enif_make_atom(env, "alt3");
   data->atom_alt4 = enif_make_atom(env, "alt4");
   data->atom_alt5 = enif_make_atom(env, "alt5");
+
+  data->atom_up = enif_make_atom(env, "up");
+  data->atom_down = enif_make_atom(env, "down");
+  data->atom_off = enif_make_atom(env, "off");
 
   *priv = (void*) data;
 

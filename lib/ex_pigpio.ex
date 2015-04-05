@@ -14,6 +14,10 @@ defmodule ExPigpio do
     exit(:nif_not_loaded)
   end
 
+  def set_pull_resistor(_pin, _pud) do
+    exit(:nif_not_loaded)
+  end
+
   def read(_pin) do
     exit(:nif_not_loaded)
   end
