@@ -49,4 +49,8 @@ defmodule ExPigpio do
   def add_alert(_gpio, _pid) do
     exit(:nif_not_loaded)
   end
+
+  def remove_alert(_gpio, _pid) do
+    exit(:nif_not_loaded)
+  end
 end
