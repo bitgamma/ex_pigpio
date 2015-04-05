@@ -50,7 +50,7 @@ void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
   while(cb != NULL) {
     if (cb->gpio == gpio) {
       ERL_NIF_TERM tuple = enif_make_tuple3(cb->env, enif_make_int(cb->env, gpio), enif_make_int(cb->env, level), enif_make_uint(cb->env, tick));
-      enif_send(NULL, &cb->receiver_pid, cb->env, tuple);
+      enif_send(cb->env, &cb->receiver_pid, cb->env, tuple);
       enif_clear_env(cb->env);
     }
 
@@ -64,7 +64,7 @@ void _init_library() {
   gpioInitialise();
 
   int i;
-  
+
   for (i = 0; i < 64; i++) {
     gpioSetSignalFunc(i, &_empty_signal_handler);
   }
