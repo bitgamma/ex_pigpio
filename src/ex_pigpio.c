@@ -390,6 +390,65 @@ static ERL_NIF_TERM add_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   }
 }
 
+static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+    return enif_make_badarg(env);
+  }
+
+  ERL_NIF_TERM pid_to_remove = argv[1];
+
+  if (!enif_is_pid(env, pid_to_remove)) {
+    return enif_make_badarg(env);
+  }
+
+  int is_last_for_gpio = 1;
+  int found = 0;
+
+  ex_pigpio_cb *callback = priv->first_cb;
+  ex_pigpio_cb *prev_callback = NULL;
+
+  while(callback != NULL) {
+    int removed = 0;
+
+    if (callback->gpio == gpio) {
+      ERL_NIF_TERM last_pid = enif_make_pid(env, &callback->receiver_pid);
+
+      if (!enif_compare(pid_to_remove, last_pid)) {
+        if (prev_callback == NULL) {
+          priv->first_cb = callback->next;
+        } else {
+          prev_callback->next = callback->next;
+        }
+
+        found = 1;
+        removed = 1;
+      } else {
+        is_last_for_gpio = 0;
+      }
+    }
+
+    callback = callback->next;
+
+    if (removed) {
+      enif_free_env(callback->env);
+      enif_free(callback);
+    } else {
+      prev_callback = callback;
+    }
+  }
+
+  if (is_last_for_gpio && found) {
+    gpioSetAlertFuncEx(gpio, NULL, NULL);
+  }
+
+  return priv->atom_ok;
+}
+
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
   { "get_mode", 1, get_mode },
@@ -402,6 +461,7 @@ static ErlNifFunc funcs[] = {
   { "get_servo_pulsewidth", 1, get_servo_pulsewidth },
   { "udelay", 1, udelay },
   { "add_alert", 2, add_alert },
+  { "remove_alert", 2, remove_alert }
 };
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
