@@ -29,6 +29,22 @@ typedef struct {
   ERL_NIF_TERM atom_off;
 } ex_pigpio_priv;
 
+void _empty_signal_handler(int signum) {
+  return;
+}
+
+void _init_library() {
+  gpioInitialise();
+
+  for (int i = 0; i < 64; i++) {
+    gpioSetSignalFunc(i, &_empty_signal_handler);
+  }
+}
+
+void _terminate_library() {
+  gpioTerminate();
+}
+
 static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
@@ -357,25 +373,25 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
 
   *priv = (void*) data;
 
-  gpioInitialise();
+  _init_library();
 
   return 0;
 }
 
 static int reload(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
-  gpioTerminate();
-  gpioInitialise();
+  _terminate_library();
+  _init_library();
 
   return 0;
 }
 
 static int upgrade(ErlNifEnv* env, void** priv, void** old_priv, ERL_NIF_TERM info) {
-  gpioTerminate();
+  _terminate_library();
   return load(env, priv, info);
 }
 
 static void unload(ErlNifEnv* env, void* priv) {
-  gpioTerminate();
+  _terminate_library();
   enif_free(priv);
 }
 
