@@ -1,6 +1,13 @@
 #include <pigpio.h>
 #include <erl_nif.h>
 
+typedef struct _ex_pigpio_cb {
+  unsigned gpio;
+  ErlNifEnv *env;
+  ErlNifPid receiver_pid;
+  struct _ex_pigpio_cb *next;
+} ex_pigpio_cb;
+
 typedef struct {
   ERL_NIF_TERM atom_ok;
   ERL_NIF_TERM atom_error;
@@ -27,9 +34,29 @@ typedef struct {
   ERL_NIF_TERM atom_up;
   ERL_NIF_TERM atom_down;
   ERL_NIF_TERM atom_off;
+
+  ex_pigpio_cb *first_cb;
 } ex_pigpio_priv;
 
 void _empty_signal_handler(int signum) {
+  return;
+}
+
+void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
+  ex_pigpio_priv *priv = (ex_pigpio_priv *) userdata;
+
+  ex_pigpio_cb *cb = priv->first_cb;
+
+  while(cb != NULL) {
+    if (cb->gpio == gpio) {
+      ERL_NIF_TERM tuple = enif_make_tuple3(cb->env, enif_make_int(cb->env, gpio), enif_make_int(cb->env, level), enif_make_uint(cb->env, tick));
+      enif_send(NULL, &cb->receiver_pid, cb->env, tuple);
+      enif_clear_env(cb->env);
+    }
+
+    cb = cb->next;
+  }
+
   return;
 }
 
@@ -326,6 +353,40 @@ static ERL_NIF_TERM udelay(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
   return enif_make_uint(env, value);
 }
 
+static ERL_NIF_TERM add_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+  	return enif_make_badarg(env);
+  }
+
+  if (!enif_is_pid(env, argv[1])) {
+    return enif_make_badarg(env);
+  }
+
+  int err = gpioSetAlertFuncEx(gpio, &_gpio_alert_callback, priv);
+
+  ex_pigpio_cb *callback;
+
+  switch(err) {
+    case 0:
+      callback = enif_alloc(sizeof(ex_pigpio_cb));
+      callback->gpio = gpio;
+      callback->env = enif_alloc_env();
+      callback->next = priv->first_cb;
+      enif_get_local_pid(env, argv[1], &callback->receiver_pid);
+      priv->first_cb = callback;
+      return priv->atom_ok;
+    case PI_BAD_USER_GPIO:
+      return priv->atom_bad_user_gpio;
+    default:
+      return priv->atom_error;
+  }
+}
+
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
   { "get_mode", 1, get_mode },
@@ -337,6 +398,7 @@ static ErlNifFunc funcs[] = {
   { "set_servo", 2, set_servo },
   { "get_servo_pulsewidth", 1, get_servo_pulsewidth },
   { "udelay", 1, udelay },
+  { "add_alert", 2, add_alert },
 };
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
@@ -371,6 +433,8 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_down = enif_make_atom(env, "down");
   data->atom_off = enif_make_atom(env, "off");
 
+  data->first_cb = NULL;
+
   *priv = (void*) data;
 
   _init_library();
@@ -392,6 +456,17 @@ static int upgrade(ErlNifEnv* env, void** priv, void** old_priv, ERL_NIF_TERM in
 
 static void unload(ErlNifEnv* env, void* priv) {
   _terminate_library();
+
+  ex_pigpio_priv* data = (ex_pigpio_priv*) priv;
+
+  while(data->first_cb != NULL) {
+    ex_pigpio_cb *next = data->first_cb->next;
+
+    enif_free_env(data->first_cb->env);
+    enif_free(data->first_cb);
+    data->first_cb = next;
+  }
+  
   enif_free(priv);
 }
 
