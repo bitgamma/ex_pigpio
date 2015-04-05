@@ -33,4 +33,16 @@ defmodule ExPigpio do
   def get_pwm_dutycycle(_pin) do
     exit(:nif_not_loaded)
   end
+
+  def set_servo(_pin, _pulsewidth) do
+    exit(:nif_not_loaded)
+  end
+
+  def get_servo_pulsewidth(_pin) do
+    exit(:nif_not_loaded)
+  end
+
+  def udelay(_usec) do
+    exit(:nif_not_loaded)
+  end
 end
