@@ -466,17 +466,15 @@ static ERL_NIF_TERM set_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     return enif_make_badarg(env);
   }
 
-  int err = gpioSetPWMrange(gpio, range);
+  int value = gpioSetPWMrange(gpio, range);
 
-  switch(err) {
-    case 0:
-      return priv->atom_ok;
+  switch(value) {
     case PI_BAD_USER_GPIO:
-      return priv->atom_bad_user_gpio;
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
     case PI_BAD_DUTYRANGE:
-      return priv->atom_bad_dutyrange;
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_dutyrange);
     default:
-      return priv->atom_error;
+      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
   }
 }
 
