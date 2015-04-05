@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Compile.Pigpio do
   @shortdoc "Compiles Pigpio"
 
   def run(_) do
-    {result, _error_code} = System.cmd("make", ["priv/pigpio.so"], stderr_to_stdout: true)
+    {result, _error_code} = System.cmd("make", ["priv/ex_pigpio.so"], stderr_to_stdout: true)
     Mix.shell.info result
     :ok
   end
