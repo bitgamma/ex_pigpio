@@ -63,7 +63,9 @@ void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
 void _init_library() {
   gpioInitialise();
 
-  for (int i = 0; i < 64; i++) {
+  int i;
+  
+  for (i = 0; i < 64; i++) {
     gpioSetSignalFunc(i, &_empty_signal_handler);
   }
 }
@@ -466,7 +468,7 @@ static void unload(ErlNifEnv* env, void* priv) {
     enif_free(data->first_cb);
     data->first_cb = next;
   }
-  
+
   enif_free(priv);
 }
 
