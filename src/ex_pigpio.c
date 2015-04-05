@@ -6,9 +6,12 @@ typedef struct {
   ERL_NIF_TERM atom_error;
 
   ERL_NIF_TERM atom_bad_gpio;
+  ERL_NIF_TERM atom_bad_user_gpio;
   ERL_NIF_TERM atom_bad_level;
   ERL_NIF_TERM atom_bad_mode;
   ERL_NIF_TERM atom_bad_pud;
+  ERL_NIF_TERM atom_bad_dutycycle;
+  ERL_NIF_TERM atom_not_pwm_gpio;
 
   ERL_NIF_TERM atom_input;
   ERL_NIF_TERM atom_output;
@@ -189,12 +192,67 @@ static ERL_NIF_TERM write(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   }
 }
 
+static ERL_NIF_TERM set_pwm(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  int pin;
+
+  if (!enif_get_int(env, argv[0], &pin)) {
+  	return enif_make_badarg(env);
+  }
+
+  int dutycycle;
+
+  if (!enif_get_int(env, argv[1], &dutycycle)) {
+    return enif_make_badarg(env);
+  }
+
+  int err = gpioPWM(pin, dutycycle);
+
+  switch(err) {
+    case 0:
+      return priv->atom_ok;
+    case PI_BAD_USER_GPIO:
+      return priv->atom_bad_user_gpio;
+    case PI_BAD_DUTYCYCLE:
+      return priv->atom_bad_dutycycle;
+    default:
+      return priv->atom_error;
+  }
+}
+
+static ERL_NIF_TERM get_pwm_dutycycle(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  int pin;
+
+  if (!enif_get_int(env, argv[0], &pin)) {
+  	return enif_make_badarg(env);
+  }
+
+  int value = gpioGetPWMdutycycle(pin);
+
+  switch(value) {
+    case PI_BAD_USER_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
+    case PI_NOT_PWM_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_not_pwm_gpio);
+    default:
+      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
+  }
+}
+
+
 static ErlNifFunc funcs[] = {
   { "set_mode", 2, set_mode },
   { "get_mode", 1, get_mode },
   { "set_pull_resistor", 2, set_pull_resistor },
   { "read", 1, read },
   { "write", 2, write },
+  { "set_pwm", 2, set_pwm },
+  { "get_pwm_dutycycle", 1, get_pwm_dutycycle },
 };
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
@@ -207,9 +265,12 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
   data->atom_ok = enif_make_atom(env, "ok");
   data->atom_error = enif_make_atom(env, "error");
   data->atom_bad_gpio = enif_make_atom(env, "bad_gpio");
+  data->atom_bad_user_gpio = enif_make_atom(env, "bad_user_gpio");
   data->atom_bad_level = enif_make_atom(env, "bad_level");
   data->atom_bad_mode = enif_make_atom(env, "bad_mode");
   data->atom_bad_pud = enif_make_atom(env, "bad_pud");
+  data->atom_bad_dutycycle = enif_make_atom(env, "bad_dutycycle");
+  data->atom_not_pwm_gpio = enif_make_atom(env, "not_pwm_gpio");
 
   data->atom_input = enif_make_atom(env, "input");
   data->atom_output = enif_make_atom(env, "output");

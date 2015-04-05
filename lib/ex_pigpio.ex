@@ -25,4 +25,12 @@ defmodule ExPigpio do
   def write(_pin, _value) do
     exit(:nif_not_loaded)
   end
+
+  def set_pwm(_pin, _dutycycle) do
+    exit(:nif_not_loaded)
+  end
+
+  def get_pwm_dutycycle(_pin) do
+    exit(:nif_not_loaded)
+  end
 end
