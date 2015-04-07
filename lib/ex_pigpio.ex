@@ -90,39 +90,108 @@ defmodule ExPigpio do
     exit(:nif_not_loaded)
   end
 
+  @doc """
+  Starts PWM on the given `gpio` pin. Set the dutycycle between 0 (off) and range (fully on). Range defaults to 255.
+
+  This function returns:
+    * `:ok` - PWM dutycycle for the `gpio` pin
+    * `:bad_user_gpio` - the given `user gpio` pin is invalid
+    * `:bad_dutycycle` - the given `dutycycle` is invalid
+    * `:error` - unknown error
+  """
   def set_pwm(_gpio, _dutycycle) do
     exit(:nif_not_loaded)
   end
 
+  @doc """
+  Gets the `dutycycle` setting of the given `gpio` pin.
+
+  This function returns:
+    * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
+    * `{:error, :not_pwm_gpio}` - the given `gpio` pin is not PWM
+    * `{:ok, value}` - the PWM dutycycle setting for the `gpio` pin
+  """
   def get_pwm_dutycycle(_gpio) do
     exit(:nif_not_loaded)
   end
 
-  def set_servo(_gpio, _pulsewidth) do
-    exit(:nif_not_loaded)
-  end
+  @doc """
+  Sets the `dutycycle range` to be used for the given `gpio` pin. Subsequent calls to gpioPWM will use a dutycycle between 0 (off) and range (fully on).
 
-  def get_servo_pulsewidth(_gpio) do
-    exit(:nif_not_loaded)
-  end
-
-  def udelay(_usec) do
-    exit(:nif_not_loaded)
-  end
-
-  def add_alert(_gpio, _pid) do
-    exit(:nif_not_loaded)
-  end
-
-  def remove_alert(_gpio, _pid) do
-    exit(:nif_not_loaded)
-  end
-
+  This function returns:
+    * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
+    * `{:error, :bad_dutyrange}` - the given `dutyrange` is invalid
+    * `{:ok, value}` - the real range for the gpio's pin frequency
+  """
   def set_pwm_range(_gpio, _range) do
     exit(:nif_not_loaded)
   end
 
+  @doc """
+  Gets the `dutycycle` range used for the given `gpio` pin.
+
+  This function returns:
+    * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
+    * `{:ok, value}` - the dutycycle range used for the `gpio` pin
+  """
   def get_pwm_range(_gpio) do
     exit(:nif_not_loaded)
   end
+
+  @doc """
+  Starts servo pulses on the given `gpio` pin, 0 (off), 500 (most anti-clockwise) to 2500 (most clockwise).
+
+  This function returns:
+    * `:ok` - servo pulsewidth for the `gpio` pin
+    * `:bad_user_gpio` - the given `user gpio` pin is invalid
+    * `:bad_pulsewidth` - the given `pulsewidth` is invalid
+    * `:error` - unknown error
+  """
+  def set_servo(_gpio, _pulsewidth) do
+    exit(:nif_not_loaded)
+  end
+
+  @doc """
+  Gets the servo `pulsewidth` setting for the given `gpio` pin.
+
+  This function returns:
+    * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
+    * `{:error, :not_servo_gpio}` - the given `gpio` pin is not a servo
+    * `{:ok, value}` - the servo pulsewidth setting for the `gpio` pin
+  """
+  def get_servo_pulsewidth(_gpio) do
+    exit(:nif_not_loaded)
+  end
+
+  @doc """
+  Delays the given `gpio` pin for at least the number of microseconds specified by micros.
+
+  This function returns:
+    * `value` - the actual length of the delay in microseconds for the `gpio` pin
+  """
+  def udelay(_usec) do
+    exit(:nif_not_loaded)
+  end
+
+  @doc """
+  Registers a function to be called (a callback) when the the given `gpio` pin changes state.
+
+  This function returns:
+    * `:ok` - a callback on the `gpio` pin state change
+    * `:bad_user_gpio` - the given `user gpio` pin is invalid
+  """
+  def add_alert(_gpio, _pid) do
+    exit(:nif_not_loaded)
+  end
+
+  @doc """
+  Removes alert on the the given `gpio` pin state change, passing NULL as the function.
+
+  This function returns:
+    * `:ok` - a callback removed
+  """
+  def remove_alert(_gpio, _pid) do
+    exit(:nif_not_loaded)
+  end
+
 end

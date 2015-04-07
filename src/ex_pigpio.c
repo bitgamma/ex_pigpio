@@ -293,6 +293,54 @@ static ERL_NIF_TERM get_pwm_dutycycle(ErlNifEnv* env, int argc, const ERL_NIF_TE
   }
 }
 
+static ERL_NIF_TERM set_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+  	return enif_make_badarg(env);
+  }
+
+  unsigned range;
+
+  if (!enif_get_uint(env, argv[1], &range)) {
+    return enif_make_badarg(env);
+  }
+
+  int value = gpioSetPWMrange(gpio, range);
+
+  switch(value) {
+    case PI_BAD_USER_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
+    case PI_BAD_DUTYRANGE:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_dutyrange);
+    default:
+      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
+  }
+}
+
+static ERL_NIF_TERM get_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  ex_pigpio_priv* priv;
+  priv = enif_priv_data(env);
+
+  unsigned gpio;
+
+  if (!enif_get_uint(env, argv[0], &gpio)) {
+  	return enif_make_badarg(env);
+  }
+
+  int value = gpioGetPWMrange(gpio);
+
+  switch(value) {
+    case PI_BAD_USER_GPIO:
+      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
+    default:
+      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
+  }
+}
+
 static ERL_NIF_TERM set_servo(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
@@ -448,54 +496,6 @@ static ERL_NIF_TERM remove_alert(ErlNifEnv* env, int argc, const ERL_NIF_TERM ar
   }
 
   return priv->atom_ok;
-}
-
-static ERL_NIF_TERM set_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-  ex_pigpio_priv* priv;
-  priv = enif_priv_data(env);
-
-  unsigned gpio;
-
-  if (!enif_get_uint(env, argv[0], &gpio)) {
-  	return enif_make_badarg(env);
-  }
-
-  unsigned range;
-
-  if (!enif_get_uint(env, argv[1], &range)) {
-    return enif_make_badarg(env);
-  }
-
-  int value = gpioSetPWMrange(gpio, range);
-
-  switch(value) {
-    case PI_BAD_USER_GPIO:
-      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
-    case PI_BAD_DUTYRANGE:
-      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_dutyrange);
-    default:
-      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
-  }
-}
-
-static ERL_NIF_TERM get_pwm_range(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-  ex_pigpio_priv* priv;
-  priv = enif_priv_data(env);
-
-  unsigned gpio;
-
-  if (!enif_get_uint(env, argv[0], &gpio)) {
-  	return enif_make_badarg(env);
-  }
-
-  int value = gpioGetPWMrange(gpio);
-
-  switch(value) {
-    case PI_BAD_USER_GPIO:
-      return enif_make_tuple2(env, priv->atom_error, priv->atom_bad_user_gpio);
-    default:
-      return enif_make_tuple2(env, priv->atom_ok, enif_make_int(env, value));
-  }
 }
 
 static ErlNifFunc funcs[] = {
