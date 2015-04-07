@@ -116,7 +116,7 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Sets the `dutycycle range` to be used for the given `gpio` pin. Subsequent calls to gpioPWM will use a dutycycle between 0 (off) and range (fully on).
+  Sets the duty cycle `range` to be used for the given `gpio` pin. Subsequent calls to gpioPWM will use a dutycycle between 0 (off) and range (fully on).
 
   This function returns:
     * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
@@ -128,7 +128,7 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Gets the `dutycycle` range used for the given `gpio` pin.
+  Gets the duty cycle range used for the given `gpio` pin.
 
   This function returns:
     * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
@@ -152,7 +152,7 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Gets the servo `pulsewidth` setting for the given `gpio` pin.
+  Gets the servo pulse width setting for the given `gpio` pin.
 
   This function returns:
     * `{:error, :bad_user_gpio}` - the given `user gpio` pin is invalid
@@ -164,7 +164,8 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Delays the given `gpio` pin for at least the number of microseconds specified by micros.
+  Delays for at least the number of microseconds specified by `usec`. Delays longer than 100us
+  should not be used.
 
   This function returns:
     * `value` - the actual length of the delay in microseconds for the `gpio` pin
@@ -174,7 +175,9 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Registers a function to be called (a callback) when the the given `gpio` pin changes state.
+  Registers the processed identified by `pid` to be notified when the the given `gpio` pin changes state.
+  The notification will be in the format `{:gpio_alert, gpio, level, time}`. If this function is invoked
+  multiple times for the same gpio/pid combination, then multiple notifications will be sent.
 
   This function returns:
     * `:ok` - a callback on the `gpio` pin state change
@@ -185,7 +188,7 @@ defmodule ExPigpio do
   end
 
   @doc """
-  Removes alert on the the given `gpio` pin state change, passing NULL as the function.
+  Removes alert on the the given `gpio` pin state change for the specified `pid`.
 
   This function returns:
     * `:ok` - a callback removed
