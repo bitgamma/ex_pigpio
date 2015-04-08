@@ -27,6 +27,6 @@ defmodule ExPigpio.Mixfile do
   end
 
   defp deps do
-    [{:pigpio, github: "joan2937/pigpio", app: false}]
+    [{:pigpio, github: "briksoftware/pigpio", app: false}]
   end
 end

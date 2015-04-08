@@ -1,1 +1,1 @@
-%{"pigpio": {:git, "git://github.com/joan2937/pigpio.git", "232136f4fa1c113c0ecca46bc0799b6e49bb0ec6", []}}
+%{"pigpio": {:git, "git://github.com/briksoftware/pigpio.git", "9e72562f27d7697831ff90c947f966289eceb202", []}}

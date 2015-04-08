@@ -41,10 +41,6 @@ typedef struct {
   ex_pigpio_cb *first_cb;
 } ex_pigpio_priv;
 
-void _empty_signal_handler(int signum) {
-  return;
-}
-
 void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
   ex_pigpio_priv *priv = (ex_pigpio_priv *) userdata;
   ex_pigpio_cb *cb = priv->first_cb;
@@ -64,12 +60,6 @@ void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
 
 void _init_library() {
   gpioInitialise();
-
-  int i;
-
-  for (i = 0; i < 64; i++) {
-    gpioSetSignalFunc(i, &_empty_signal_handler);
-  }
 }
 
 void _terminate_library() {
