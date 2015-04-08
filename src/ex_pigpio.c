@@ -58,14 +58,6 @@ void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
   return;
 }
 
-void _init_library() {
-  gpioInitialise();
-}
-
-void _terminate_library() {
-  gpioTerminate();
-}
-
 static ERL_NIF_TERM set_mode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ex_pigpio_priv* priv;
   priv = enif_priv_data(env);
@@ -544,25 +536,21 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
 
   *priv = (void*) data;
 
-  _init_library();
-
-  return 0;
+  return gpioInitialise() == PIGPIO_VERSION ? 0 : 1;
 }
 
 static int reload(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
-  _terminate_library();
-  _init_library();
-
-  return 0;
+  gpioTerminate();
+  return gpioInitialise() == PIGPIO_VERSION ? 0 : 1;
 }
 
 static int upgrade(ErlNifEnv* env, void** priv, void** old_priv, ERL_NIF_TERM info) {
-  _terminate_library();
+  gpioTerminate();
   return load(env, priv, info);
 }
 
 static void unload(ErlNifEnv* env, void* priv) {
-  _terminate_library();
+  gpioTerminate();
 
   ex_pigpio_priv* data = (ex_pigpio_priv*) priv;
 
