@@ -168,7 +168,7 @@ defmodule ExPigpio do
   should not be used.
 
   This function returns:
-    * `value` - the actual length of the delay in microseconds for the `gpio` pin
+    * `value` - the actual length of the delay in microseconds
   """
   def udelay(_usec) do
     exit(:nif_not_loaded)
@@ -180,7 +180,7 @@ defmodule ExPigpio do
   multiple times for the same gpio/pid combination, then multiple notifications will be sent.
 
   This function returns:
-    * `:ok` - a callback on the `gpio` pin state change
+    * `:ok` - the alert on the `gpio` pin state change has been activated
     * `:bad_user_gpio` - the given `user gpio` pin is invalid
   """
   def add_alert(_gpio, _pid) do
@@ -191,7 +191,7 @@ defmodule ExPigpio do
   Removes alert on the the given `gpio` pin state change for the specified `pid`.
 
   This function returns:
-    * `:ok` - a callback removed
+    * `:ok` - the alert has been removed
   """
   def remove_alert(_gpio, _pid) do
     exit(:nif_not_loaded)
