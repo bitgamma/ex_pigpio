@@ -21,7 +21,7 @@ ex_pigpio:
 	$(MIX) compile
 
 priv/ex_pigpio.so: src/ex_pigpio.c
-	$(MAKE) CFLAGS="-DEMBEDDED_IN_VM" -C $(PIGPIO_PATH) libpigpio.a
+	$(MAKE) CFLAGS="-DEMBEDDED_IN_VM" -B -C $(PIGPIO_PATH) libpigpio.a
 	$(CC) $(CFLAGS) -shared $(LDFLAGS) -o $@ src/ex_pigpio.c $(PIGPIO_PATH)/libpigpio.a
 
 clean:
