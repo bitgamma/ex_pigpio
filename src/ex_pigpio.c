@@ -48,7 +48,7 @@ void _gpio_alert_callback(int gpio, int level, uint32_t tick, void *userdata) {
   while(cb != NULL) {
     if (cb->gpio == gpio) {
       ERL_NIF_TERM tuple = enif_make_tuple4(cb->env, priv->atom_gpio_alert, enif_make_int(cb->env, gpio), enif_make_int(cb->env, level), enif_make_uint(cb->env, tick));
-      enif_send(cb->env, &cb->receiver_pid, cb->env, tuple);
+      enif_send(NULL, &cb->receiver_pid, cb->env, tuple);
       enif_clear_env(cb->env);
     }
 
